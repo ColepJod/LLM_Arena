@@ -1,0 +1,190 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+:root {
+  --background: #fafafa;
+  --foreground: #18181b;
+  --panel: #ffffff;
+  --panel-muted: #f4f4f5;
+  --line: #e4e4e7;
+  --accent: #4f46e5;
+  --accent-strong: #4338ca;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #09090b;
+    --foreground: #f4f4f5;
+    --panel: #111113;
+    --panel-muted: #18181b;
+    --line: #27272a;
+    --accent: #818cf8;
+    --accent-strong: #a5b4fc;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-panel: var(--panel);
+  --color-panel-muted: var(--panel-muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  border-color: var(--line);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(
+      circle at 15% -10%,
+      rgb(99 102 241 / 0.11),
+      transparent 34rem
+    ),
+    radial-gradient(circle at 90% 0%, rgb(14 165 233 / 0.08), transparent 30rem);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+::selection {
+  background: rgb(99 102 241 / 0.25);
+}
+
+.markdown {
+  overflow-wrap: anywhere;
+}
+
+.markdown > :first-child {
+  margin-top: 0;
+}
+
+.markdown > :last-child {
+  margin-bottom: 0;
+}
+
+.markdown pre {
+  background: #0b1020;
+  border: 1px solid rgb(255 255 255 / 0.08);
+  border-radius: 0.75rem;
+  color: #e2e8f0;
+  font-size: 0.8125rem;
+  line-height: 1.65;
+  overflow-x: auto;
+  padding: 0.9rem 1rem;
+}
+
+.markdown pre code {
+  background: transparent;
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  padding: 0;
+}
+
+.markdown :not(pre) > code {
+  background: var(--panel-muted);
+  border: 1px solid var(--line);
+  border-radius: 0.35rem;
+  font-size: 0.86em;
+  padding: 0.1rem 0.3rem;
+}
+
+.markdown :not(pre) > code::before,
+.markdown :not(pre) > code::after {
+  content: none;
+}
+
+.markdown table {
+  font-size: 0.85rem;
+}
+
+.markdown th {
+  background: var(--panel-muted);
+}
+
+.markdown blockquote {
+  border-left-color: var(--accent);
+}
+
+.hljs-comment,
+.hljs-quote {
+  color: #8b9bb4;
+  font-style: italic;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-section,
+.hljs-link {
+  color: #c4b5fd;
+}
+
+.hljs-string,
+.hljs-title,
+.hljs-name,
+.hljs-type,
+.hljs-attribute,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition,
+.hljs-variable,
+.hljs-template-tag,
+.hljs-template-variable {
+  color: #86efac;
+}
+
+.hljs-number,
+.hljs-meta,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-params {
+  color: #fbbf24;
+}
+
+.hljs-function .hljs-title,
+.hljs-title.function_ {
+  color: #7dd3fc;
+}
+
+.hljs-deletion {
+  color: #fca5a5;
+}
+
+@keyframes arena-blink {
+  0%,
+  45% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.arena-caret {
+  animation: arena-blink 1s steps(1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .arena-caret,
+  .animate-pulse,
+  .animate-spin,
+  .animate-bounce {
+    animation: none !important;
+  }
+}

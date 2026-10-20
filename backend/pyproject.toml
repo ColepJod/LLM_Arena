@@ -1,0 +1,42 @@
+[project]
+name = "model-arena-backend"
+version = "0.1.0"
+description = "FastAPI backend for Model Arena, a side-by-side LLM comparison app."
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.153.0",
+    "langchain>=1.4.6",
+    "langchain-google-genai>=4.4.2",
+    "langchain-openai>=1.7.2",
+    "pydantic-settings>=2.16.1",
+    "uvicorn[standard]>=0.54.0",
+]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "mypy>=1.18.0",
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "ruff>=0.17.1",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+warn_unused_ignores = true
