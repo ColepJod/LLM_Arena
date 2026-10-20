@@ -6,6 +6,7 @@ import { ApiError, streamCompare } from "@/lib/api";
 import type {
   ComparisonState,
   ModelSelection,
+  ResearchState,
   Side,
   SideMetrics,
   SideState,
@@ -28,6 +29,7 @@ function initialState(): ComparisonState {
     a: idleSide(),
     b: idleSide(),
     lastPrompt: null,
+    research: null,
   };
 }
 
@@ -37,6 +39,7 @@ type Action =
   | { type: "append"; side: Side; text: string }
   | { type: "done"; side: Side; metrics: SideMetrics }
   | { type: "error"; side: Side; message: string }
+  | { type: "research"; research: ResearchState }
   | { type: "stop" }
   | { type: "clear" };
 
@@ -61,6 +64,7 @@ function reducer(state: ComparisonState, action: Action): ComparisonState {
           status: "streaming",
         },
         lastPrompt: action.prompt,
+        research: null,
       };
     case "start":
       return updateSide(state, action.side, (side) =>
@@ -90,6 +94,8 @@ function reducer(state: ComparisonState, action: Action): ComparisonState {
           ? { ...side, status: "error", error: action.message, metrics: null }
           : side,
       );
+    case "research":
+      return { ...state, research: action.research };
     case "stop":
       return {
         ...state,
@@ -203,6 +209,17 @@ export function useCompare() {
                   message: event.message,
                 });
                 break;
+              case "research":
+                dispatch({
+                  type: "research",
+                  research: {
+                    status: event.status,
+                    query: event.query,
+                    sources: event.sources,
+                    message: event.message,
+                  },
+                });
+                break;
             }
           }
 
@@ -265,6 +282,7 @@ export function useCompare() {
     a: state.a,
     b: state.b,
     lastPrompt: state.lastPrompt,
+    research: state.research,
     isStreaming:
       state.a.status === "streaming" || state.b.status === "streaming",
     run,

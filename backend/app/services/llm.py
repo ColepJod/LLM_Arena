@@ -1,7 +1,9 @@
 """Provider factory and safe upstream error translation."""
 
 import asyncio
+import re
 
+import httpx
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import ChatOpenAI
@@ -103,12 +105,18 @@ def _exception_status_code(exc: Exception) -> int | None:
     status = getattr(response, "status_code", None)
     if isinstance(status, int):
         return status
+    match = re.match(r"^\s*(?:HTTP\s*)?([45]\d{2})\b", str(exc), re.IGNORECASE)
+    if match:
+        return int(match.group(1))
     return None
 
 
 def translate_upstream_error(exc: Exception) -> UpstreamError:
     """Map provider failures onto short, user-safe messages."""
-    if isinstance(exc, (APITimeoutError, TimeoutError, asyncio.TimeoutError)):
+    if isinstance(
+        exc,
+        (APITimeoutError, TimeoutError, asyncio.TimeoutError, httpx.TimeoutException),
+    ):
         return UpstreamError("The model took too long to respond. Try again.")
     if isinstance(exc, (AuthenticationError, PermissionDeniedError)):
         return UpstreamError(
@@ -151,7 +159,7 @@ def translate_upstream_error(exc: Exception) -> UpstreamError:
             "another model.",
             status_code=429,
         )
-    if isinstance(exc, (APIConnectionError, APIError)) or (
+    if isinstance(exc, (APIConnectionError, APIError, httpx.TransportError)) or (
         status is not None and status >= 500
     ):
         return UpstreamError(

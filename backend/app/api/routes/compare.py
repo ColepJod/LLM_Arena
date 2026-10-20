@@ -60,6 +60,7 @@ async def list_models(provider: Provider) -> ModelsResponse:
 async def compare(payload: CompareRequest, request: Request) -> StreamingResponse:
     """Stream two model responses as one interleaved NDJSON response."""
     request_id = uuid4().hex[:12]
+    settings = get_settings()
     client_ip = request.client.host if request.client else "unknown"
     logger.info(
         "compare.request.started",
@@ -90,6 +91,7 @@ async def compare(payload: CompareRequest, request: Request) -> StreamingRespons
             payload.a,
             payload.b,
             request_id=request_id,
+            research_enabled=bool(settings.tavily_api_key),
         ):
             yield (
                 json.dumps(

@@ -44,6 +44,19 @@ class CompareRequest(BaseModel):
         return self
 
 
+class ResearchSource(BaseModel):
+    title: str
+    url: str
+
+
+class ResearchEvent(BaseModel):
+    type: Literal["research"] = "research"
+    status: Literal["searching", "done", "error"]
+    query: str
+    sources: list[ResearchSource] = Field(default_factory=list)
+    message: str | None = None
+
+
 class StartEvent(BaseModel):
     side: Side
     type: Literal["start"] = "start"

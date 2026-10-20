@@ -12,6 +12,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { EmptyState } from "@/components/EmptyState";
 import { ModelPicker } from "@/components/ModelPicker";
 import { PromptInput } from "@/components/PromptInput";
+import { ResearchBanner } from "@/components/ResearchBanner";
 import { ResponsePanel } from "@/components/ResponsePanel";
 import { useCompare } from "@/hooks/useCompare";
 import { fetchProviders } from "@/lib/api";
@@ -341,6 +342,8 @@ export function ArenaShell() {
             </div>
           )}
         </section>
+
+        <ResearchBanner research={compare.research} />
 
         {hasResults ? (
           <section className="mt-6" aria-labelledby="results-heading">

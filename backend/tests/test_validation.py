@@ -5,7 +5,11 @@ from fastapi.testclient import TestClient
 from app.core.config import Settings
 from app.main import app
 from app.schemas.common import ModelSelection
-from app.services.llm import MissingAPIKeyError, UpstreamError
+from app.services.llm import (
+    MissingAPIKeyError,
+    UpstreamError,
+    translate_upstream_error,
+)
 
 client = TestClient(app)
 
@@ -68,7 +72,9 @@ def test_same_model_on_both_sides_is_allowed(monkeypatch) -> None:
     import app.api.routes.compare as compare_route
     from app.schemas.compare import DeltaEvent, DoneEvent, StartEvent
 
-    async def fake_run_comparison(prompt, a, b, *, request_id=""):
+    async def fake_run_comparison(
+        prompt, a, b, *, request_id="", research_enabled=False
+    ):
         yield StartEvent(side="a")
         yield StartEvent(side="b")
         yield DeltaEvent(side="a", text="same")
@@ -109,3 +115,13 @@ def test_missing_key_and_upstream_errors_have_safe_messages() -> None:
         in UpstreamError("Rate limit reached.", status_code=429).user_message
     )
     assert ModelSelection(provider="groq", model="openai/gpt-oss-120b")
+
+
+def test_status_codes_embedded_in_provider_errors_are_translated() -> None:
+    overloaded = translate_upstream_error(
+        RuntimeError("503 UNAVAILABLE. This model is in high demand.")
+    )
+    assert "temporarily unavailable" in overloaded.user_message
+
+    rate_limited = translate_upstream_error(RuntimeError("429 Too Many Requests"))
+    assert "Rate limit" in rate_limited.user_message

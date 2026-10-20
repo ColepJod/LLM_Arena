@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     groq_api_key: str = ""
     openrouter_api_key: str = ""
     gemini_api_key: str = ""
+    tavily_api_key: str = ""
 
     groq_base_url: str = "https://api.groq.com/openai/v1"
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
@@ -31,6 +32,8 @@ class Settings(BaseSettings):
 
     allowed_origins: str = "http://localhost:3000"
     llm_timeout_seconds: float = 60.0
+    tavily_timeout_seconds: float = 15.0
+    tavily_max_results: int = 5
     rate_limit_requests: int = 10
     rate_limit_window_seconds: int = 60
 

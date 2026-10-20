@@ -8,6 +8,10 @@ into a single NDJSON response. A Next.js frontend parses that stream, keeps
 each pane independent, and renders metrics, errors, and cancellations as they
 happen.
 
+For time-sensitive prompts about news, scores, weather, prices, and similar
+topics, the backend searches Tavily once, adds the fresh sources to both model
+prompts, and shows the sources in the UI.
+
 ```
 Browser
   │
@@ -15,6 +19,7 @@ Browser
   └── POST /compare ── NDJSON stream ──┐
                                       │
                               FastAPI backend
+                                ├── Tavily (fresh context)
                                 ├── Groq
                                 ├── OpenRouter
                                 └── Gemini
@@ -54,6 +59,7 @@ Browser
 - At least one API key from [Groq](https://console.groq.com/keys),
   [OpenRouter](https://openrouter.ai/keys), or
   [Google AI Studio](https://aistudio.google.com/apikey)
+- Optional: a [Tavily](https://app.tavily.com/) key for live web research
 
 ## Setup
 
@@ -71,6 +77,7 @@ Add the API keys you have to `backend/.env`:
 GROQ_API_KEY=
 OPENROUTER_API_KEY=
 GEMINI_API_KEY=
+TAVILY_API_KEY=
 ALLOWED_ORIGINS=http://localhost:3000
 OPENROUTER_SITE_URL=
 OPENROUTER_APP_NAME=Model Arena
@@ -109,6 +116,7 @@ at another backend, set it in `frontend/.env.local` and restart the dev server.
 | `GROQ_API_KEY`        | No       | Enables Groq models.                                               |
 | `OPENROUTER_API_KEY`  | No       | Enables OpenRouter free models.                                    |
 | `GEMINI_API_KEY`      | No       | Enables Gemini models.                                             |
+| `TAVILY_API_KEY`      | No       | Enables live web research for time-sensitive prompts.              |
 | `ALLOWED_ORIGINS`     | No       | Comma-separated CORS origins. Defaults to `http://localhost:3000`. |
 | `OPENROUTER_SITE_URL` | No       | Optional OpenRouter `HTTP-Referer` header.                         |
 | `OPENROUTER_APP_NAME` | No       | Optional OpenRouter `X-Title` header.                              |
@@ -166,13 +174,15 @@ Request:
 {
   "prompt": "Explain recursion with a small example.",
   "a": { "provider": "groq", "model": "openai/gpt-oss-120b" },
-  "b": { "provider": "gemini", "model": "gemini-3.8-flash" }
+  "b": { "provider": "gemini", "model": "gemini-3.5-flash-lite" }
 }
 ```
 
 Response content type is `application/x-ndjson`. Each line is one event:
 
 ```text
+{"type":"research","status":"searching","query":"What are the latest scores?","sources":[],"message":null}
+{"type":"research","status":"done","query":"What are the latest scores?","sources":[{"title":"Live scores","url":"https://example.com/scores"}],"message":null}
 {"side":"a","type":"start"}
 {"side":"b","type":"start"}
 {"side":"a","type":"delta","text":"Recursion is "}
@@ -185,6 +195,10 @@ The backend starts both sides concurrently, emits events as tokens arrive, and
 isolates failures with a per-side `error` event. One failed model never stops
 the other.
 
+When live research is enabled and the prompt looks time-sensitive, research
+events arrive before the model `start` events. Tavily failures emit a research
+`error` event and the comparison continues without fresh context.
+
 `ttft_ms` is the time from side start to the first visible token. `total_ms`
 includes the full generation. Token counts are approximate and calculated by
 the frontend from the streamed text.
@@ -196,13 +210,20 @@ The catalog is intentionally small and curated in
 OpenRouter, and Gemini.
 
 Model IDs were checked against provider documentation on **2026-10-20**. Free
-model availability can change. If a provider retires a model, update the
-catalog entry and the catalog tests together.
+model availability can change. The first catalog entry for each provider is the
+UI default; Gemini starts with 3.5 Flash-Lite because 3.8 Flash was
+intermittently unavailable during verification. If a provider retires a model,
+update the catalog entry and the catalog tests together.
 
 ## Behavior
 
 - **Single-turn only.** No chat history, accounts, database, or saved prompts.
 - **No AI SDK `useChat`.** The frontend parses NDJSON with a custom hook.
+- **Live web research is automatic.** Prompts containing terms such as
+  `latest`, `today`, `scores`, `weather`, `price`, or `news` trigger a Tavily
+  search. Results are treated as untrusted context, added to both prompts, and
+  listed as source links above the comparison. Tavily returns recent web
+  results, not a guaranteed real-time scoreboard or news feed.
 - **Same model allowed.** Both panes can select the same provider and model.
 - **Turn selection is saved.** Provider and model choices persist in
   `localStorage`; prompts and responses are not saved.

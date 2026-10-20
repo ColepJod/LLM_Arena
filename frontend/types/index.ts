@@ -64,7 +64,23 @@ export interface ErrorEvent {
   message: string;
 }
 
-export type CompareEvent = StartEvent | DeltaEvent | DoneEvent | ErrorEvent;
+export interface ResearchSource {
+  title: string;
+  url: string;
+}
+
+export type ResearchStatus = "searching" | "done" | "error";
+
+export interface ResearchEvent {
+  type: "research";
+  status: ResearchStatus;
+  query: string;
+  sources: ResearchSource[];
+  message: string | null;
+}
+
+export type CompareEvent =
+  StartEvent | DeltaEvent | DoneEvent | ErrorEvent | ResearchEvent;
 
 export interface SideMetrics {
   ttftMs: number;
@@ -80,8 +96,16 @@ export interface SideState {
   stopped: boolean;
 }
 
+export interface ResearchState {
+  status: ResearchStatus;
+  query: string;
+  sources: ResearchSource[];
+  message: string | null;
+}
+
 export interface ComparisonState {
   a: SideState;
   b: SideState;
   lastPrompt: string | null;
+  research: ResearchState | null;
 }

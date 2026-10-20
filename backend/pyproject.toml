@@ -5,6 +5,7 @@ description = "FastAPI backend for Model Arena, a side-by-side LLM comparison ap
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.153.0",
+    "httpx>=0.28.1",
     "langchain>=1.4.6",
     "langchain-google-genai>=4.4.2",
     "langchain-openai>=1.7.2",
@@ -14,7 +15,6 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "httpx>=0.28.1",
     "mypy>=1.18.0",
     "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",

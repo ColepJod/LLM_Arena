@@ -48,12 +48,11 @@ MODEL_CATALOG: dict[Provider, tuple[CatalogModel, ...]] = {
         CatalogModel("poolside/laguna-s-2.1:free", "Laguna S 2.1"),
     ),
     "gemini": (
+        CatalogModel("gemini-3.5-flash-lite", "Gemini 3.5 Flash-Lite"),
+        CatalogModel("gemini-2.5-flash", "Gemini 2.5 Flash"),
         CatalogModel("gemini-3.8-flash", "Gemini 3.8 Flash"),
         CatalogModel("gemini-3.6-flash", "Gemini 3.6 Flash"),
-        CatalogModel("gemini-3.5-flash-lite", "Gemini 3.5 Flash-Lite"),
         CatalogModel("gemini-3.1-flash-lite", "Gemini 3.1 Flash-Lite"),
-        CatalogModel("gemini-2.5-flash", "Gemini 2.5 Flash"),
-        CatalogModel("gemini-2.5-flash-lite", "Gemini 2.5 Flash-Lite"),
     ),
 }
 
